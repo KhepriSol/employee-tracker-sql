@@ -145,4 +145,36 @@ function handleUpdateEmployeeInput(answer) {
     displayStartScreen();
   });
 }
+
+function viewDepartment() {
+  var query = "SELECT * FROM department";
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.table(res);
+    displayStartScreen();
+  });
+}
+
+function viewRoles() {
+  var query = "SELECT * FROM role";
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.table(res);
+    displayStartScreen();
+  });
+}
+
+function viewEmployees() {
+  var query = "SELECT * FROM employee";
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.table(res);
+    displayStartScreen();
+  });
+}
+
+function quit() {
+  connection.end();
+  process.exit();
+}
 //# sourceMappingURL=index.dev.js.map

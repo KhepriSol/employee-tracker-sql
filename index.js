@@ -164,3 +164,34 @@ const dbConnection = mysql.createConnection({
     );
   }
   
+  function viewDepartment() {
+    let query = "SELECT * FROM department";
+    connection.query(query, function(err, res) {
+      if (err) throw err;
+      console.table(res);
+      displayStartScreen();
+    });
+  }
+
+  function viewRoles() {
+    let query = "SELECT * FROM role";
+    connection.query(query, function(err, res) {
+      if (err) throw err;
+      console.table(res);
+      displayStartScreen();
+    });
+  }
+  function viewEmployees() {
+    let query = "SELECT * FROM employee";
+    connection.query(query, function(err, res) {
+      if (err) throw err;
+      console.table(res);
+      displayStartScreen();
+    });
+  }
+  function quit() {
+    connection.end();
+    process.exit();
+  }
+  
+  
