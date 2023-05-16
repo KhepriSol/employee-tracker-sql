@@ -62,4 +62,105 @@ const dbConnection = mysql.createConnection({
       });
   }
   
+  function addRole() {
+    inquirer.prompt([
+      {
+        type: "input",
+        name: "roleName",
+        message: "Enter the name of the role:"
+      },
+      {
+        type: "input",
+        name: "salaryTotal",
+        message: "Enter the salary for this role:"
+      },
+      {
+        type: "input",
+        name: "deptID",
+        message: "Enter the department ID number:"
+      }
+    ])
+    .then(handleRoleInput);
+  }
+  
+  function handleRoleInput(answer) {
+    connection.query(
+      "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)",
+      [answer.roleName, answer.salaryTotal, answer.deptID],
+      function(err, res) {
+        if (err) throw err;
+        console.table(res);
+        displayStartScreen();
+      }
+    );
+  }
+  
+  function addEmployee() {
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          message: "Enter the first name of the employee:",
+          name: "eeFirstName"
+        },
+        {
+          type: "input",
+          message: "Enter the last name of the employee:",
+          name: "eeLastName"
+        },
+        {
+          type: "input",
+          message: "Enter the employee's role ID number:",
+          name: "roleID"
+        },
+        {
+          type: "input",
+          message: "Enter the manager ID number:",
+          name: "managerID"
+        }
+      ])
+      .then(handleEmployeeInput);
+  }
+  
+  function handleEmployeeInput(answer) {
+    connection.query(
+      "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",
+      [answer.eeFirstName, answer.eeLastName, answer.roleID, answer.managerID],
+      function(err, res) {
+        if (err) throw err;
+        console.table(res);
+        displayStartScreen();
+      }
+    );
+  }
+  
+
+  function updateEmployee() {
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          message: "Which employee would you like to update?",
+          name: "eeUpdate"
+        },
+        {
+          type: "input",
+          message: "What do you want to update to?",
+          name: "updateRole"
+        }
+      ])
+      .then(handleUpdateEmployeeInput);
+  }
+  
+  function handleUpdateEmployeeInput(answer) {
+    connection.query(
+      "UPDATE employee SET role_id = ? WHERE first_name = ?",
+      [answer.updateRole, answer.eeUpdate],
+      function(err, res) {
+        if (err) throw err;
+        console.table(res);
+        displayStartScreen();
+      }
+    );
+  }
   
