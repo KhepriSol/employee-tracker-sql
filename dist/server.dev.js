@@ -1,129 +1,130 @@
 "use strict";
 
-var inquirer = require("inquirer"),
-    mysql = require("mysql"),
-    cTable = require("console.table"),
-    db = require(".");
+//Dependencies found here
+var inquirer = require("inquirer");
 
-var connection = mysql.createConnection({
-  host: "localhost",
-  port: 3306,
-  user: "root",
+var mysql = require("mysql");
+
+var cTable = require("console.table");
+
+var db = require(".");
+
+var dbConnection = mysql.createConnection({
+  server: "localhost",
+  port: 3000,
+  username: "admin",
+  password: "Yonkers24!",
   database: "employeesDB"
 });
-connection.connect(function (err) {
-  if (err) throw err;
-  console.log("connected as id " + connection.threadId);
-  startScreen();
+dbConnection.connect(function (error) {
+  if (error) throw error;
+  console.log("Connected to the database as ID " + dbConnection.threadId);
+  displayStartScreen();
 });
 
-var startScreen = function startScreen() {
+function displayStartScreen() {
   inquirer.prompt({
     type: "list",
-    choices: ["Add department", "Add role", "Add employee", "View departments", "View roles", "View employees", "Update employee role", "Quit"],
+    name: "option",
     message: "What would you like to do?",
-    name: "option"
-  }).then(function (result) {
-    console.log("You entered: " + result.option);
+    choices: [{
+      name: "Create new department",
+      value: createDepartment
+    }, {
+      name: "Create new role",
+      value: createRole
+    }, {
+      name: "Add new employee",
+      value: addEmployee
+    }, {
+      name: "View departments",
+      value: viewDepartments
+    }, {
+      name: "View roles",
+      value: viewRoles
+    }, {
+      name: "View employees",
+      value: viewEmployees
+    }, {
+      name: "Update employee role",
+      value: updateEmployeeRole
+    }, {
+      name: "Exit",
+      value: exitProgram
+    }]
+  }).then(handleOption);
+}
 
-    switch (result.option) {
-      case "Add department":
-        addDepartment();
-        break;
+function handleOption(result) {
+  console.log("Selected option: " + result.option);
+  result.option();
+}
 
-      case "Add role":
-        addRole();
-        break;
-
-      case "Add employee":
-        addEmployee();
-        break;
-
-      case "View departments":
-        viewDepartment();
-        break;
-
-      case "View roles":
-        viewRoles();
-        break;
-
-      case "View employees":
-        viewEmployees();
-        break;
-
-      case "Update employee role":
-        updateEmployee();
-        break;
-
-      default:
-        quit();
-    }
-  });
-};
-
-var addDepartment = function addDepartment() {
+function addDepartment() {
   inquirer.prompt({
     type: "input",
-    message: "What is the name of the department?",
+    message: "Enter the name of the department:",
     name: "deptName"
   }).then(function (answer) {
     connection.query("INSERT INTO department (name) VALUES (?)", [answer.deptName], function (err, res) {
       if (err) throw err;
       console.table(res);
-      startScreen();
+      displayStartScreen();
     });
   });
-};
+}
 
-var addRole = function addRole() {
+function addRole() {
   inquirer.prompt([{
     type: "input",
-    message: "What's the name of the role?",
-    name: "roleName"
+    name: "roleName",
+    message: "Enter the name of the role:"
   }, {
     type: "input",
-    message: "What is the salary for this role?",
-    name: "salaryTotal"
+    name: "salaryTotal",
+    message: "Enter the salary for this role:"
   }, {
     type: "input",
-    message: "What is the department id number?",
-    name: "deptID"
-  }]).then(function (answer) {
-    connection.query("INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)", [answer.roleName, answer.salaryTotal, answer.deptID], function (err, res) {
-      if (err) throw err;
-      console.table(res);
-      startScreen();
-    });
-  });
-}; // Function to add employee
+    name: "deptID",
+    message: "Enter the department ID number:"
+  }]).then(handleRoleInput);
+}
 
+function handleRoleInput(answer) {
+  connection.query("INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)", [answer.roleName, answer.salaryTotal, answer.deptID], function (err, res) {
+    if (err) throw err;
+    console.table(res);
+    displayStartScreen();
+  });
+}
 
 function addEmployee() {
   inquirer.prompt([{
     type: "input",
-    message: "What's the first name of the employee?",
-    name: "eeFirstName"
+    message: "Enter the first name of the employee:",
+    name: "FirstName"
   }, {
     type: "input",
-    message: "What's the last name of the employee?",
-    name: "eeLastName"
+    message: "Enter the last name of the employee:",
+    name: "LastName"
   }, {
     type: "input",
-    message: "What is the employee's role id number?",
+    message: "Enter the employee's role ID number:",
     name: "roleID"
   }, {
     type: "input",
-    message: "What is the manager id number?",
+    message: "Enter the manager ID number:",
     name: "managerID"
-  }]).then(function (answer) {
-    connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [answer.eeFirstName, answer.eeLastName, answer.roleID, answer.managerID], function (err, res) {
-      if (err) throw err;
-      console.table(res);
-      startScreen();
-    });
-  });
-} // Function to update employee
+  }]).then(handleEmployeeInput);
+}
 
+function handleEmployeeInput(answer) {
+  connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [answer.eeFirstName, answer.eeLastName, answer.roleID, answer.managerID], function (err, res) {
+    if (err) throw err;
+    console.table(res);
+    displayStartScreen();
+  });
+}
 
 function updateEmployee() {
   inquirer.prompt([{
@@ -134,45 +135,43 @@ function updateEmployee() {
     type: "input",
     message: "What do you want to update to?",
     name: "updateRole"
-  }]).then(function (answer) {
-    connection.query("UPDATE employee SET role_id=? WHERE first_name= ?", [answer.updateRole, answer.eeUpdate], function (err, res) {
-      if (err) throw err;
-      console.table(res);
-      startScreen();
-    });
-  });
-} // Function to view department
+  }]).then(handleUpdateEmployeeInput);
+}
 
+function handleUpdateEmployeeInput(answer) {
+  connection.query("UPDATE employee SET role_id = ? WHERE first_name = ?", [answer.updateRole, answer.eeUpdate], function (err, res) {
+    if (err) throw err;
+    console.table(res);
+    displayStartScreen();
+  });
+}
 
 function viewDepartment() {
   var query = "SELECT * FROM department";
   connection.query(query, function (err, res) {
     if (err) throw err;
     console.table(res);
-    startScreen();
+    displayStartScreen();
   });
-} // Function to view roles
-
+}
 
 function viewRoles() {
   var query = "SELECT * FROM role";
   connection.query(query, function (err, res) {
     if (err) throw err;
     console.table(res);
-    startScreen();
+    displayStartScreen();
   });
-} // Function to view employees
-
+}
 
 function viewEmployees() {
   var query = "SELECT * FROM employee";
   connection.query(query, function (err, res) {
     if (err) throw err;
     console.table(res);
-    startScreen();
+    displayStartScreen();
   });
-} // Function to quit
-
+}
 
 function quit() {
   connection.end();
